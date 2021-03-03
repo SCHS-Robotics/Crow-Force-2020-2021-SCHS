@@ -35,16 +35,16 @@ import static java.lang.Math.PI;
 public class MainRobot extends Robot {
 
     public MecanumDrive mDrive;
-    public FoundationGrabberSubsystem grabber;
+    //public FoundationGrabberSubsystem grabber;
     public EncoderSubsystem distance;
     public AutonomousSelectorSubsystemUsingConfig selector;
-    public IntakeSubSystemServo blockIntakeServo;
+    //public IntakeSubSystemServo blockIntakeServo;
     public IntakeSubSystemMotors blockIntakeMotors;
-    public MarkerServoSubsystem markerServo;
+    //public MarkerServoSubsystem markerServo;
     public opencvSkystoneDetector_v2 openCV;
     //public IntakeSubSystemServoNew2Servos blockIntakeServo;
-    public LinearSlidesMotorsSubsystem linearMotors;
-    public LinearSlidesServosSubsystem linearServos;
+    //public LinearSlidesMotorsSubsystem linearMotors;
+    //public LinearSlidesServosSubsystem linearServos;
     public CustomOdometryGlobalCoordinatePosition odometry;
     public GoalTargetingSubSystem aimbot;
 
@@ -59,7 +59,7 @@ public class MainRobot extends Robot {
                 "topRight",
                 "bottomLeft",
                 "bottomRight", false);
-        //We also need to set a localizer for mDrive
+        // We also need to set a localizer for mDrive
         // Idk which side to reverse
         mDrive.setReverseType(MecanumDrive.ReverseType.LEFT);
 
@@ -67,19 +67,17 @@ public class MainRobot extends Robot {
         mDrive.setLocalizer(new HolonomicDriveEncoderIMULocalizer(
                 this,
                 mDrive,
-                "",
+                "imu",
                 "topLeft",
                 "topRight",
                 "bottomLeft",
                 "bottomRight"
         ));
 
-        //
-
-        mDrive.setTurnPID(new PIDCoefficients(1, 1, 1));
-        mDrive.setHeadingPID(new PIDCoefficients(1, 1, 1));
-        //PID tolerance needed?  Heading of 0.1 degrees tolerance
-        mDrive.setHeadingPIDTolerance(0.1, HALAngleUnit.DEGREES);
+        mDrive.setDriveStick(new Button(1, Button.VectorInputs.left_stick));
+        mDrive.setTurnStick(new Button(1, Button.DoubleInputs.right_stick_x));
+        mDrive.setAllMotorModes(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        mDrive.setReverseType(MecanumDrive.ReverseType.LEFT);
 
         //probably dont need this
         PIDController dsa = new PIDController(1.6, 0, 0, new BiFunction<Double,Double,Double>() {
@@ -125,7 +123,7 @@ public class MainRobot extends Robot {
 
 
         startGui(new Button(1, Button.BooleanInputs.y));  // etiene sucks
-        grabber = new FoundationGrabberSubsystem(this, "armL", "armR");
+        //grabber = new FoundationGrabberSubsystem(this, "armL", "armR");
         /* need to set up new mechanum drive
         mDrive = new CustomMechinumDrive(this, new CustomMechinumDrive.Params("topLeft", "topRight", "bottomLeft", "bottomRight")
                 .setDriveStick(new Button(1, Button.VectorInputs.left_stick))
@@ -137,13 +135,13 @@ public class MainRobot extends Robot {
                 //.setStabilityPID(stability)
                 .setImuNumber(2)); */         //blockIntakeMotor = new IntakeSubSystemMotors(this,"blockIntakeLeft", "blockIntakeRight");
         selector = new AutonomousSelectorSubsystemUsingConfig(this);
-        blockIntakeServo = new IntakeSubSystemServo(this, "blockIntakeServo");
+        //blockIntakeServo = new IntakeSubSystemServo(this, "blockIntakeServo");
         blockIntakeMotors = new IntakeSubSystemMotors(this, "leftIntake", "rightIntake");
-        linearMotors = new LinearSlidesMotorsSubsystem(this, "forwardEncoder", "strafeEncoder");
-        linearServos = new LinearSlidesServosSubsystem(this, "blockIntakeServoGrabber", "blockIntakeServoVertical");
+        //linearMotors = new LinearSlidesMotorsSubsystem(this, "forwardEncoder", "strafeEncoder");
+        //linearServos = new LinearSlidesServosSubsystem(this, "blockIntakeServoGrabber", "blockIntakeServoVertical");
         //blockIntakeServo = new IntakeSubSystemServoNew2Servos(this, "servoVertical", "servoGrab");
         distance = new EncoderSubsystem(this, "forwardEncoder", "mDrive");
-        markerServo = new MarkerServoSubsystem(this, "markerOutput");
+        //markerServo = new MarkerServoSubsystem(this, "markerOutput");
         openCV = new opencvSkystoneDetector_v2(this);
         //todo update odometry subsystem with correct encoder names and counts per inch
         odometry = new CustomOdometryGlobalCoordinatePosition(this, "fill1", "fill2", "fill3", 600, 50);

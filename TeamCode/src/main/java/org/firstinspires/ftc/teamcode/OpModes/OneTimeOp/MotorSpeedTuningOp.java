@@ -1,10 +1,11 @@
 package org.firstinspires.ftc.teamcode.OpModes.OneTimeOp;
 
-import com.SCHSRobotics.HAL9001.system.source.BaseRobot.BaseTeleop;
-import com.SCHSRobotics.HAL9001.system.source.BaseRobot.Robot;
-import com.SCHSRobotics.HAL9001.util.annotations.StandAlone;
-import com.SCHSRobotics.HAL9001.util.math.Vector;
-import com.SCHSRobotics.HAL9001.util.misc.Toggle;
+
+import com.SCHSRobotics.HAL9001.system.config.StandAlone;
+import com.SCHSRobotics.HAL9001.system.robot.BaseTeleop;
+import com.SCHSRobotics.HAL9001.system.robot.Robot;
+import com.SCHSRobotics.HAL9001.util.control.Toggle;
+import com.SCHSRobotics.HAL9001.util.math.geometry.Vector2D;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.Robots.MotorTuningRobot;
@@ -18,7 +19,7 @@ public class MotorSpeedTuningOp extends BaseTeleop {
         asd = new MotorTuningRobot(this);
         return asd;
     }
-    Vector driveVector;
+    Vector2D driveVector;
     double speed;
     Toggle toggle1;
     Toggle toggle2;
@@ -26,7 +27,7 @@ public class MotorSpeedTuningOp extends BaseTeleop {
     @Override
     public void onInit(){
         telemetry.setAutoClear(true);
-        driveVector = new Vector(0, .3);
+        driveVector = new Vector2D(0, .3);
         speed = .3;
         toggle1 = new Toggle(Toggle.ToggleTypes.trueOnceToggle, false);
         toggle2 = new Toggle(Toggle.ToggleTypes.trueOnceToggle, false);
@@ -43,10 +44,10 @@ public class MotorSpeedTuningOp extends BaseTeleop {
         if(toggle2.getCurrentState()){
             speed += .1;
         }
-        driveVector = new Vector(0, speed);
+        driveVector = new Vector2D(0, speed);
         telemetry.addData("current speed", speed);
         if(driveToggle.getCurrentState()) {
-            asd.mDrive.driveTime(driveVector, 1000);
+            asd.mDrive.moveTime(driveVector, 1000);
         }
         telemetry.update();
     }

@@ -1,19 +1,11 @@
 package org.firstinspires.ftc.teamcode.Robots;
 
 import com.SCHSRobotics.HAL9001.system.robot.Robot;
-import com.SCHSRobotics.HAL9001.util.control.Button;
-import com.SCHSRobotics.HAL9001.util.control.PIDController;
-import com.SCHSRobotics.HAL9001.util.functional_interfaces.BiFunction;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.teamcode.Subsystems.OneTimeUse.CustomPidTuner;
-
-import static java.lang.Math.PI;
 
 public class PID_TunerRobot extends Robot {
 
-    CustomPidTuner PIDSubsystem;
+    //CustomPidTuner PIDSubsystem;
 
     public PID_TunerRobot(OpMode opMode) {
 

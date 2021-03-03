@@ -1,7 +1,8 @@
 package org.firstinspires.ftc.teamcode.OpModes.OneTimeOp;
 
-import com.SCHSRobotics.HAL9001.system.source.BaseRobot.Robot;
-import com.SCHSRobotics.HAL9001.system.source.BaseRobot.SubSystem;
+
+import com.SCHSRobotics.HAL9001.system.robot.Robot;
+import com.SCHSRobotics.HAL9001.system.robot.SubSystem;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
 public class MotorTest extends SubSystem {

@@ -18,6 +18,7 @@ public class IntakeSubSystemMotors extends SubSystem {
     private final String INBUTTON = "InButton", OUTBUTTON = "OutButton";
 
     TelemetryMenu dMenu = new TelemetryMenu();
+    //opencvSkystoneDetector_v2 openCV;
 
     public IntakeSubSystemMotors(Robot r, String inl, String inr) {
         super(r);
@@ -26,6 +27,7 @@ public class IntakeSubSystemMotors extends SubSystem {
         input = new CustomizableGamepad(r);
         usesConfig = true;
         robot.gui.addRootMenu(dMenu);
+        //openCV = new opencvSkystoneDetectorv2(r);
     }
 
 
@@ -66,6 +68,7 @@ public class IntakeSubSystemMotors extends SubSystem {
 
     @Override
     public void init()  {
+        //
     }
 
     public void intake(double ms) {

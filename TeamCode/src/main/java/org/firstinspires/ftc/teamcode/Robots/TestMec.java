@@ -2,6 +2,8 @@ package org.firstinspires.ftc.teamcode.Robots;
 
 
 import com.SCHSRobotics.HAL9001.system.robot.Robot;
+import com.SCHSRobotics.HAL9001.system.robot.localizer.HolonomicDriveEncoderIMULocalizer;
+import com.SCHSRobotics.HAL9001.system.robot.roadrunner_util.RoadrunnerConfig;
 import com.SCHSRobotics.HAL9001.system.robot.subsystems.drivetrain.MecanumDrive;
 import com.SCHSRobotics.HAL9001.util.control.Button;
 import com.SCHSRobotics.HAL9001.util.control.PIDController;
@@ -18,9 +20,28 @@ public class TestMec extends Robot {
     public MecanumDrive mDrive;
     public TestMecOp testMec;
 
-
     public TestMec(OpMode opMode) {
         super(opMode);
+        mDrive = new MecanumDrive(
+                this,
+                new RoadrunnerConfig(1.88976, 1, 13.359, 383.6, 435),
+                "topLeft",
+                "topRight",
+                "bottomLeft",
+                "bottomRight", false);
+        mDrive.setLocalizer(new HolonomicDriveEncoderIMULocalizer(
+                this,
+                mDrive,
+                "imu",
+                "topLeft",
+                "topRight",
+                "bottomLeft",
+                "bottomRight"
+        ));
+        mDrive.setDriveStick(new Button(1, Button.VectorInputs.left_stick));
+        mDrive.setTurnStick(new Button(1, Button.DoubleInputs.right_stick_x));
+        mDrive.setAllMotorModes(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        mDrive.setReverseType(MecanumDrive.ReverseType.LEFT);
         PIDController dsa = new PIDController(1.3, 0, 0, new BiFunction<Double,Double,Double>() {
             @Override
             public Double apply(Double target, Double current) {
@@ -44,22 +65,19 @@ public class TestMec extends Robot {
 
         startGui(new Button(1, Button.BooleanInputs.y));
 
-        mDrive = new MechanumDrive(this, new MechanumDrive.Params("topLeft", "topRight", "bottomLeft", "bottomRight")
+/*        mDrive = new MechanumDrive(this, new MechanumDrive.Params("topLeft", "topRight", "bottomLeft", "bottomRight")
                 .setDriveStick(new Button(1, Button.VectorInputs.left_stick))
                 .setTurnStick(new Button(1, Button.DoubleInputs.right_stick_x))
                 .setConstantSpeedModifier(1)
                 .setSpeedModeMultiplier(.5)
                 .setSpeedModeButton(new Button(1, Button.BooleanInputs.a))
                 .setTurnPID(dsa)
-                .setImuNumber(2));          //blockIntakeMotor = new IntakeSubSystemMotors(this,"blockIntakeLeft", "blockIntakeRight");
+                .setImuNumber(2));        */
 
-        mDrive.getMotors()[0].setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        mDrive.getMotors()[1].setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        mDrive.getMotors()[2].setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        mDrive.getMotors()[3].setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        putSubSystem("MechanumDrive", mDrive);
+        //blockIntakeMotor = new IntakeSubSystemMotors(this,"blockIntakeLeft", "blockIntakeRight");
+        // putSubSystem("MechanumDrive", mDrive);
 
-        testMec = new TestMecOp(this);
-        putSubSystem("TestMec", testMec);
+        // estMec = new TestMecOp(this);
+        // putSubSystem("TestMec", testMec);
     }
 }

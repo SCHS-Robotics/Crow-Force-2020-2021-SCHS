@@ -1,8 +1,9 @@
 package org.firstinspires.ftc.teamcode.OpModes.OneTimeOp;
 
-import com.SCHSRobotics.HAL9001.system.source.BaseRobot.BaseTeleop;
-import com.SCHSRobotics.HAL9001.system.source.BaseRobot.Robot;
-import com.SCHSRobotics.HAL9001.util.annotations.StandAlone;
+
+import com.SCHSRobotics.HAL9001.system.config.StandAlone;
+import com.SCHSRobotics.HAL9001.system.robot.BaseTeleop;
+import com.SCHSRobotics.HAL9001.system.robot.Robot;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.Robots.TestMec;

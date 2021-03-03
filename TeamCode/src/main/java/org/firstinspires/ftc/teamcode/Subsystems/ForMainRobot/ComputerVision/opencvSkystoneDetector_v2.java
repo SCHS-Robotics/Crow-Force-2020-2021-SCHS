@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode.Subsystems.ForMainRobot.ComputerVision;
 
-
 import com.SCHSRobotics.HAL9001.system.robot.Robot;
 import com.SCHSRobotics.HAL9001.system.robot.SubSystem;
 import com.qualcomm.robotcore.util.ElapsedTime;

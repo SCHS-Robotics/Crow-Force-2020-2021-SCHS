@@ -5,14 +5,16 @@ package org.firstinspires.ftc.teamcode.OpModes.Autonomous;
 import com.SCHSRobotics.HAL9001.system.config.StandAlone;
 import com.SCHSRobotics.HAL9001.system.robot.BaseAutonomous;
 import com.SCHSRobotics.HAL9001.system.robot.Robot;
+import com.SCHSRobotics.HAL9001.system.robot.roadrunner_util.HALTrajectory;
 import com.SCHSRobotics.HAL9001.util.math.EncoderToDistanceProcessor;
+import com.SCHSRobotics.HAL9001.util.math.geometry.Point2D;
+import com.SCHSRobotics.HAL9001.util.math.geometry.Vector2D;
 import com.SCHSRobotics.HAL9001.util.math.units.HALAngleUnit;
 import com.SCHSRobotics.HAL9001.util.math.units.HALDistanceUnit;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
 
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.Robots.MainRobot;
 
 import java.text.DecimalFormat;
@@ -20,9 +22,6 @@ import java.io.*;
 import java.util.*;
 
 import static java.lang.Math.PI;
-import static java.lang.Math.pow;
-import static java.lang.Math.toDegrees;
-import static java.lang.Math.toRadians;
 
 
 @StandAlone
@@ -53,7 +52,7 @@ public class Autonomouss extends BaseAutonomous {
 
     private void strafeEncoders(double power, int encoder) {
         int encoderStart = robot.distance.sEncoders();
-        robot.mDrive.drive(new Vector(power, 0));
+        robot.mDrive.movePower(new Vector2D(power, 0));
         while (Math.abs(robot.distance.sEncoders() - encoderStart) < encoder) {
             double temp = Math.abs(robot.distance.sEncoders() - encoderStart);
             telemetry.addData("Strafe Encoders:", robot.distance.sEncoders());
@@ -72,7 +71,7 @@ public class Autonomouss extends BaseAutonomous {
 
     private void driveEncoders(double power, int encoder) {
         int encoderStart = robot.distance.fEncoders();
-        robot.mDrive.drive(new Vector(0, -power));
+        robot.mDrive.movePower(new Vector2D(0, -power));
         telemetry.addData("Before: ", -power);
         telemetry.update();
         while (Math.abs(robot.distance.fEncoders() - encoderStart) < encoder) {
@@ -128,7 +127,7 @@ public class Autonomouss extends BaseAutonomous {
     }
 
     public void turnToFromAngle(double angle) {
-        double ending = (mod(angle + robot.mDrive.getCurrentAngle(AngleUnit.RADIANS) - Math.PI, 2 * Math.PI)) + Math.PI;
+        double ending = (mod(angle + robot.mDrive.getPoseEstimate().getHeading() - Math.PI, 2 * Math.PI)) + Math.PI;
         telemetry.addLine("Angle: " + radToDeg(angle) + " Ending: " + radToDeg(ending) + " " + radToDeg(angle - ending));
         telemetry.addLine(radToDeg(startAngle));
         telemetry.update();
@@ -166,196 +165,195 @@ public class Autonomouss extends BaseAutonomous {
     String asd;
     Long ree;
 
-
-
-
     @Override
-    public void main() {
-        if (once) {
-            robot.markerServo.MarkerServo.setPosition(.5);
-            startAngle = robot.mDrive.getCurrentAngle(); //is there still a mDrive method for this? or is it HAL odometry now? should we use connor's odometry?
-            once = false;
-        }
-        telemetry.setAutoClear(true);
-        String position;
-        switch (robot.selector.autonomous) {
-            // Playback Autonomous from playback telly
-            case ("Playback Autonomous"):
-                // Read from File:
-                BufferedReader br = new BufferedReader(new FileReader("playbackTellyOutputs.txt"));
-                // Make a Bill Zhang object
-                StringTokenizer Bill_Zhang = new StringTokenizer(br.readLine());
-                double d1 = Double.parseDouble(Bill_Zhang.nextToken());
-                Bill_Zhang = new StringTokenizer(br.readLine());
-                double d2 = Double.parseDouble(Bill_Zhang.nextToken());
+    public void main(){
+        try {
+            if (once) {
+                startAngle = robot.mDrive.getPoseEstimate().getHeading() * 180 / (2 * PI); //is there still a mDrive method for this? or is it HAL odometry now? should we use connor's odometry?
+                once = false;
+            }
+            telemetry.setAutoClear(true);
+            String position;
+            switch (robot.selector.autonomous) {
+                // Playback Autonomous from playback telly
+                case ("Playback Autonomous"):
+                    // Read from File:
+                    BufferedReader br = new BufferedReader(new FileReader("playbackTellyOutputs.txt"));
+                    // Make a Bill Zhang object
+                    StringTokenizer Bill_Zhang = new StringTokenizer(br.readLine());
+                    double fx = Double.parseDouble(Bill_Zhang.nextToken());
+                    Bill_Zhang = new StringTokenizer(br.readLine());
+                    double fy = Double.parseDouble(Bill_Zhang.nextToken());
+                    double fh = Double.parseDouble(Bill_Zhang.nextToken());
+
+                    HALTrajectory trajectory = robot.mDrive.trajectoryBuilder(robot.mDrive.getPoseEstimate(), HALDistanceUnit.INCHES, HALAngleUnit.RADIANS)
+                            .splineTo(new Point2D(fx, fy), 3)
+                            .build();
+                    robot.mDrive.updateLocalizer();
 
 
+                case ("Strafe Test"):
+                    //robot.mDrive.driveEncoders(new Vector(-1,0), 4000, true);
+                    strafeEncoders(pow1, cmprocessor.getEncoderAmount(10, HALDistanceUnit.CENTIMETERS));
+                    strafeEncoders(-pow1, cmprocessor.getEncoderAmount(10, HALDistanceUnit.CENTIMETERS));
+                    strafeEncoders(pow1, cmprocessor.getEncoderAmount(10, HALDistanceUnit.CENTIMETERS));
+                    strafeEncoders(-pow1, cmprocessor.getEncoderAmount(10, HALDistanceUnit.CENTIMETERS));
+                    strafeEncoders(pow1, cmprocessor.getEncoderAmount(10, HALDistanceUnit.CENTIMETERS));
+                    strafeEncoders(-pow1, cmprocessor.getEncoderAmount(10, HALDistanceUnit.CENTIMETERS));
+                    strafeEncoders(pow1, cmprocessor.getEncoderAmount(10, HALDistanceUnit.CENTIMETERS));
+                    strafeEncoders(-pow1, cmprocessor.getEncoderAmount(10, HALDistanceUnit.CENTIMETERS));
+                    strafeEncoders(pow1, cmprocessor.getEncoderAmount(10, HALDistanceUnit.CENTIMETERS));
+                    strafeEncoders(-pow1, cmprocessor.getEncoderAmount(10, HALDistanceUnit.CENTIMETERS));
+                    break;
+                case ("Turn90"):
+                    telemetry.addData("", robot.mDrive.getPoseEstimate().getHeading() * 180 / (2 * PI));
+                    telemetry.update();
+                    turnTo(Math.PI / 2);
+                    turnTo(0);
+                    turnTo(Math.PI);
+                    turnTo(5 * Math.PI / 4);
+                    break;
+                case ("OpenCV"):
+                    position = robot.openCV.check();
+                    break;
+
+                case ("Park"): //remember to change the code for this to the new game
+                    if (robot.selector.color.equals("Red")) {
+                        driveEncoders(pow1, oneTile + 850);
+                    } else if (robot.selector.color.equals("Blue")) {
+                        driveEncoders(pow1, oneTile + 850);
+                    }
 
 
-            case ("Strafe Test"):
-                //robot.mDrive.driveEncoders(new Vector(-1,0), 4000, true);
-                strafeEncoders(pow1, cmprocessor.getEncoderAmount(10, HALDistanceUnit.CENTIMETERS));
-                strafeEncoders(-pow1, cmprocessor.getEncoderAmount(10, HALDistanceUnit.CENTIMETERS));
-                strafeEncoders(pow1, cmprocessor.getEncoderAmount(10, HALDistanceUnit.CENTIMETERS));
-                strafeEncoders(-pow1, cmprocessor.getEncoderAmount(10, HALDistanceUnit.CENTIMETERS));
-                strafeEncoders(pow1, cmprocessor.getEncoderAmount(10, HALDistanceUnit.CENTIMETERS));
-                strafeEncoders(-pow1, cmprocessor.getEncoderAmount(10, HALDistanceUnit.CENTIMETERS));
-                strafeEncoders(pow1, cmprocessor.getEncoderAmount(10, HALDistanceUnit.CENTIMETERS));
-                strafeEncoders(-pow1, cmprocessor.getEncoderAmount(10, HALDistanceUnit.CENTIMETERS));
-                strafeEncoders(pow1, cmprocessor.getEncoderAmount(10, HALDistanceUnit.CENTIMETERS));
-                strafeEncoders(-pow1, cmprocessor.getEncoderAmount(10, HALDistanceUnit.CENTIMETERS));
-                break;
-            case ("Turn90"):
-                telemetry.addData("", robot.mDrive.getCurrentAngle(AngleUnit.DEGREES));
-                telemetry.update();
-                turnTo(Math.PI / 2);
-                turnTo(0);
-                turnTo(Math.PI);
-                turnTo(5 * Math.PI / 4);
-                break;
-            case ("OpenCV"):
-                position = robot.openCV.check();
-                break;
-
-            case ("Park"): //remember to change the code for this to the new game
-                if (robot.selector.color.equals("Red")) {
-                    driveEncoders(pow1, oneTile + 850);
-                } else if (robot.selector.color.equals("Blue")) {
-                    driveEncoders(pow1, oneTile + 850);
-                }
-
-            case ("intakeTest"):
-                robot.blockIntakeServo.intakeDown();
-
-            case ("MaxPoints"):
-                asd = robot.openCV.check();
-                telemetry.addLine(asd);
-                telemetry.update();
-                ree = System.currentTimeMillis();
-                while (System.currentTimeMillis() - ree < 2000) {
-                }
-                switch (asd) {
-                    case "A":
-                        //starting position: turned facing the donuts
-                        turnTo(side * 0);
-                        //1: we want to first rotate towards the center of the field, and launch a donut at each of the goals in the middle
-                        //1: turn so the robot is facing the marker thing that is closest to our teams' goal
-                        driveEncoders(1, 20);
-                        turnTo(side * -25);
-                        //2: launch donut 1 at the marker
-                        //insert launching method here
-                        //3: rotate a lil more to face the middle marker
-                        turnTo(side * -35);
-                        //4: launch donut 2 at the marker
-                        //insert launching method here
-                        //5: rotate a lil more to face the farthest marker, or the marker most far from our teams' goal
-                        turnTo(side * -45);
-                        //6: launch donut 3 at the marker
-                        //insert launching method here
-                        //2: then we want to drop the wobble goal
-                        turnTo(side * 0);
-                        //1: then drive forward so we are lined up with area A, while being in front of our goal
-                        driveEncoders(1, 500);
-                        //2: rotate towards area A
-                        turnTo(side * 90);
-                        //3: drive forward so the wobble goal is in the area
-                        driveEncoders(1, 200);
-                        //4: and drop the wobble goal
-                        //insert plopper function
-                        //3: then we gotta get back to the line and park
-                        //1: reverse so we're lined up with the goal
-                        //2: strafe to the line and park
-                        driveEncoders(-1, 250);
-                        strafeEncoders(side * 1, 250);
+                case ("MaxPoints"):
+                    asd = robot.openCV.check();
+                    telemetry.addLine(asd);
+                    telemetry.update();
+                    ree = System.currentTimeMillis();
+                    while (System.currentTimeMillis() - ree < 2000) {
+                    }
+                    switch (asd) {
+                        case "A":
+                            //starting position: turned facing the donuts
+                            turnTo(side * 0);
+                            //1: we want to first rotate towards the center of the field, and launch a donut at each of the goals in the middle
+                            //1: turn so the robot is facing the marker thing that is closest to our teams' goal
+                            driveEncoders(1, 20);
+                            turnTo(side * -25);
+                            //2: launch donut 1 at the marker
+                            //insert launching method here
+                            //3: rotate a lil more to face the middle marker
+                            turnTo(side * -35);
+                            //4: launch donut 2 at the marker
+                            //insert launching method here
+                            //5: rotate a lil more to face the farthest marker, or the marker most far from our teams' goal
+                            turnTo(side * -45);
+                            //6: launch donut 3 at the marker
+                            //insert launching method here
+                            //2: then we want to drop the wobble goal
+                            turnTo(side * 0);
+                            //1: then drive forward so we are lined up with area A, while being in front of our goal
+                            driveEncoders(1, 500);
+                            //2: rotate towards area A
+                            turnTo(side * 90);
+                            //3: drive forward so the wobble goal is in the area
+                            driveEncoders(1, 200);
+                            //4: and drop the wobble goal
+                            //insert plopper function
+                            //3: then we gotta get back to the line and park
+                            //1: reverse so we're lined up with the goal
+                            //2: strafe to the line and park
+                            driveEncoders(-1, 250);
+                            strafeEncoders(side * 1, 250);
 
 
-                    case "B":
-                        //starting position: turned facing the donuts
-                        turnTo(side * 0);
-                        //1: we want to first rotate towards the center of the field, and launch a donut at each of the goals in the middle
-                        //1: turn so the robot is facing the marker thing that is closest to our teams' goal
-                        driveEncoders(1, 20);
-                        turnTo(side * -25);
-                        //2: launch donut 1 at the marker
-                        //insert launching method here
-                        //3: rotate a lil more to face the middle marker
-                        turnTo(side * -35);
-                        //4: launch donut 2 at the marker
-                        //insert launching method here
-                        //5: rotate a lil more to face the farthest marker, or the marker most far from our teams' goal
-                        turnTo(side * -45);
-                        //6: launch donut 3 at the marker
-                        //insert launching method here
-                        //2: then we want to pick up any donuts on the field and send them into the top goal
-                        //1: we want to rotate so we're flush facing our team's goal
-                        turnTo(side * 0);
-                        //driveEncoders(-0.1, 20);
-                        //2: i think the next step should be strafing a lil bit so the donut(s) that we scan at the start are lined up with the intake
-                        strafeEncoders(side * 0.5, 50);
-                        //3: then drive forward and intake 1 donut
-                        driveEncoders(1, 250);
-                        //insert intake method here
-                        //4: launch da donut into the top goal
-                        //insert launching method here
-                        //3: then we want to drop the wobble goal
-                        //1: then drive forward to area B
-                        driveEncoders(1, 500);
-                        //2: and drop the wobble goal
-                        //insert plopper method here
-                        //4: then reverse onto the line thing and park
-                        //1: reverse onto the line thing
-                        //2: park lol idk
-                        driveEncoders(-1, 250);
+                        case "B":
+                            //starting position: turned facing the donuts
+                            turnTo(side * 0);
+                            //1: we want to first rotate towards the center of the field, and launch a donut at each of the goals in the middle
+                            //1: turn so the robot is facing the marker thing that is closest to our teams' goal
+                            driveEncoders(1, 20);
+                            turnTo(side * -25);
+                            //2: launch donut 1 at the marker
+                            //insert launching method here
+                            //3: rotate a lil more to face the middle marker
+                            turnTo(side * -35);
+                            //4: launch donut 2 at the marker
+                            //insert launching method here
+                            //5: rotate a lil more to face the farthest marker, or the marker most far from our teams' goal
+                            turnTo(side * -45);
+                            //6: launch donut 3 at the marker
+                            //insert launching method here
+                            //2: then we want to pick up any donuts on the field and send them into the top goal
+                            //1: we want to rotate so we're flush facing our team's goal
+                            turnTo(side * 0);
+                            //driveEncoders(-0.1, 20);
+                            //2: i think the next step should be strafing a lil bit so the donut(s) that we scan at the start are lined up with the intake
+                            strafeEncoders(side * 0.5, 50);
+                            //3: then drive forward and intake 1 donut
+                            driveEncoders(1, 250);
+                            //insert intake method here
+                            //4: launch da donut into the top goal
+                            //insert launching method here
+                            //3: then we want to drop the wobble goal
+                            //1: then drive forward to area B
+                            driveEncoders(1, 500);
+                            //2: and drop the wobble goal
+                            //insert plopper method here
+                            //4: then reverse onto the line thing and park
+                            //1: reverse onto the line thing
+                            //2: park lol idk
+                            driveEncoders(-1, 250);
 
-                    case "C":
-                        //starting position: turned facing the donuts
-                        turnTo(side * 0);
-                        //1: we want to first rotate towards the center of the field, and launch a donut at each of the goals in the middle
-                        //1: turn so the robot is facing the marker thing that is closest to our teams' goal
-                        driveEncoders(1, 20);
-                        turnTo(side * -25);
-                        //2: launch donut 1 at the marker
-                        //insert launching method here
-                        //3: rotate a lil more to face the middle marker
-                        turnTo(side * -35);
-                        //4: launch donut 2 at the marker
-                        //insert launching method here
-                        //5: rotate a lil more to face the farthest marker, or the marker most far from our teams' goal
-                        turnTo(side * -45);
-                        //6: launch donut 3 at the marker
-                        //insert launching method here
-                        //2: then we want to pick up any donuts on the field and send them into the top goal
-                        //1: we want to rotate so we're flush facing our team's goal
-                        turnTo(side * 0);
-                        //driveEncoders(-0.1, 20);
-                        //2: i think the next step should be strafing a lil bit so the donut(s) that we scan at the start are lined up with the intake
-                        strafeEncoders(0.5, side * 50);
-                        //3: then drive forward and intake 3 donuts
-                        driveEncoders(1, 250);
-                        //insert intake method here
-                        //insert intake method here
-                        //insert intake method here
-                        //4: launch da donuts into the top goal
-                        //insert launching method here
-                        //5: intake the last donut
-                        //insert intake method here
-                        //6: launch da donut into the top goal
-                        //insert launching method here
-                        //3: then we want to drop the wobble goal
-                        //1: drive forward until we're in front of our team's goal
-                        driveEncoders(1, 500);
-                        //2: then you rotate towards area C
-                        turnTo(side * 90);
-                        //3: then drive forward into the area
-                        driveEncoders(1, 200);
-                        //4: drop the wobble goal
-                        //insert plopper method here
-                        //4: then we have to return to the line thing and park
-                        //1: reverse so that we're in front of our goal
-                        driveEncoders(-1, 200);
-                        //2: strafe to the line and park
-                        strafeEncoders(1, side * 500);
-                }
+                        case "C":
+                            //starting position: turned facing the donuts
+                            turnTo(side * 0);
+                            //1: we want to first rotate towards the center of the field, and launch a donut at each of the goals in the middle
+                            //1: turn so the robot is facing the marker thing that is closest to our teams' goal
+                            driveEncoders(1, 20);
+                            turnTo(side * -25);
+                            //2: launch donut 1 at the marker
+                            //insert launching method here
+                            //3: rotate a lil more to face the middle marker
+                            turnTo(side * -35);
+                            //4: launch donut 2 at the marker
+                            //insert launching method here
+                            //5: rotate a lil more to face the farthest marker, or the marker most far from our teams' goal
+                            turnTo(side * -45);
+                            //6: launch donut 3 at the marker
+                            //insert launching method here
+                            //2: then we want to pick up any donuts on the field and send them into the top goal
+                            //1: we want to rotate so we're flush facing our team's goal
+                            turnTo(side * 0);
+                            //driveEncoders(-0.1, 20);
+                            //2: i think the next step should be strafing a lil bit so the donut(s) that we scan at the start are lined up with the intake
+                            strafeEncoders(0.5, side * 50);
+                            //3: then drive forward and intake 3 donuts
+                            driveEncoders(1, 250);
+                            //insert intake method here
+                            //insert intake method here
+                            //insert intake method here
+                            //4: launch da donuts into the top goal
+                            //insert launching method here
+                            //5: intake the last donut
+                            //insert intake method here
+                            //6: launch da donut into the top goal
+                            //insert launching method here
+                            //3: then we want to drop the wobble goal
+                            //1: drive forward until we're in front of our team's goal
+                            driveEncoders(1, 500);
+                            //2: then you rotate towards area C
+                            turnTo(side * 90);
+                            //3: then drive forward into the area
+                            driveEncoders(1, 200);
+                            //4: drop the wobble goal
+                            //insert plopper method here
+                            //4: then we have to return to the line thing and park
+                            //1: reverse so that we're in front of our goal
+                            driveEncoders(-1, 200);
+                            //2: strafe to the line and park
+                            strafeEncoders(1, side * 500);
+                    }
 
 
 
@@ -401,186 +399,94 @@ public class Autonomouss extends BaseAutonomous {
 
                     }
                 } */
-            case ("MidOption1"):
-                asd = robot.openCV.check();
-                telemetry.addLine(asd);
-                telemetry.update();
-                ree = System.currentTimeMillis();
-                while (System.currentTimeMillis() - ree < 2000) {
-                }
-                switch (asd) {
-                    case "A":
-                        //starting position: turned facing the donuts
-                        turnTo(side * 0);
-                        //1: we want to first rotate towards the center of the field, and launch a donut at each of the goals in the middle
-                        //1: turn so the robot is facing the marker thing that is closest to our teams' goal
-                        driveEncoders(1, 20);
-                        turnTo(side * -25);
-                        //2: launch donut 1 at the marker
-                        //insert launching method here
-                        //3: rotate a lil more to face the middle marker
-                        turnTo(side * -35);
-                        //4: launch donut 2 at the marker
-                        //insert launching method here
-                        //5: rotate a lil more to face the farthest marker, or the marker most far from our teams' goal
-                        turnTo(side * -45);
-                        //6: launch donut 3 at the marker
-                        //insert launching method here
-                        //1: we want to rotate so we're flush facing our team's goal
-                        turnTo(side * 0);
-                        strafeEncoders(side * 1, 200);
-                        driveEncoders(1, 500);
-                        // insert plopper method here
-                        driveEncoders(-1, 100);
-
-                    case "B":
-                        //starting position: turned facing the donuts
-                        turnTo(side * 0);
-                        //1: we want to first rotate towards the center of the field, and launch a donut at each of the goals in the middle
-                        //1: turn so the robot is facing the marker thing that is closest to our teams' goal
-                        driveEncoders(1, 20);
-                        turnTo(side * -25);
-                        //2: launch donut 1 at the marker
-                        //insert launching method here
-                        //3: rotate a lil more to face the middle marker
-                        turnTo(side * -35);
-                        //4: launch donut 2 at the marker
-                        //insert launching method here
-                        //5: rotate a lil more to face the farthest marker, or the marker most far from our teams' goal
-                        turnTo(side * -45);
-                        //6: launch donut 3 at the marker
-                        //insert launching method here
-                        //1: we want to rotate so we're flush facing our team's goal
-                        strafeEncoders(side * 1, 200);
-                        driveEncoders(1, 750);
-                        turnTo(-side * 90);
-                        // insert plopper method here
-                        strafeEncoders(-1, -250);
-
-                    case "C":
-                        //starting position: turned facing the donuts
-                        turnTo(side * 0);
-                        //1: we want to first rotate towards the center of the field, and launch a donut at each of the goals in the middle
-                        //1: turn so the robot is facing the marker thing that is closest to our teams' goal
-                        driveEncoders(1, 20);
-                        turnTo(side * -25);
-                        //2: launch donut 1 at the marker
-                        //insert launching method here
-                        //3: rotate a lil more to face the middle marker
-                        turnTo(side * -35);
-                        //4: launch donut 2 at the marker
-                        //insert launching method here
-                        //5: rotate a lil more to face the farthest marker, or the marker most far from our teams' goal
-                        turnTo(side * -45);
-                        //6: launch donut 3 at the marker
-                        //insert launching method here
-                        //1: we want to rotate so we're flush facing our team's goal
-                        strafeEncoders(side * 1, 200);
-                        driveEncoders(1, 1000);
-                        // insert plopper method here
-                        driveEncoders(-1, -500);
-                }
-            case ("MidOption2"):
-                asd = robot.openCV.check();
-                telemetry.addLine(asd);
-                telemetry.update();
-                ree = System.currentTimeMillis();
-                while (System.currentTimeMillis() - ree < 2000) {
+                case ("MidOption1"):
+                    asd = robot.openCV.check();
+                    telemetry.addLine(asd);
+                    telemetry.update();
+                    ree = System.currentTimeMillis();
+                    while (System.currentTimeMillis() - ree < 2000) {
+                    }
                     switch (asd) {
                         case "A":
-                            strafeEncoders(side*1, 200);
-                            driveEncoders(1, 200);
-                            //4: and drop the wobble goal
-                            //insert plopper function
-                            //3: then we gotta get back to the line and park
-                            //1: reverse so we're lined up with the goal
-                            //2: strafe to the line and park
-                            driveEncoders(-1, 250);
-
-
+                            //starting position: turned facing the donuts
+                            turnTo(side * 0);
+                            //1: we want to first rotate towards the center of the field, and launch a donut at each of the goals in the middle
+                            //1: turn so the robot is facing the marker thing that is closest to our teams' goal
+                            driveEncoders(1, 20);
+                            turnTo(side * -25);
+                            //2: launch donut 1 at the marker
+                            //insert launching method here
+                            //3: rotate a lil more to face the middle marker
+                            turnTo(side * -35);
+                            //4: launch donut 2 at the marker
+                            //insert launching method here
+                            //5: rotate a lil more to face the farthest marker, or the marker most far from our teams' goal
+                            turnTo(side * -45);
+                            //6: launch donut 3 at the marker
+                            //insert launching method here
+                            //1: we want to rotate so we're flush facing our team's goal
+                            turnTo(side * 0);
+                            strafeEncoders(side * 1, 200);
+                            driveEncoders(1, 500);
+                            // insert plopper method here
+                            driveEncoders(-1, 100);
 
                         case "B":
-                            strafeEncoders(side * -1, 100);
-                            //3: then drive forward and intake 1 donut
-                            driveEncoders(1, 250);
-                            //insert intake method here
-                            //4: launch da donut into the top goal
+                            //starting position: turned facing the donuts
+                            turnTo(side * 0);
+                            //1: we want to first rotate towards the center of the field, and launch a donut at each of the goals in the middle
+                            //1: turn so the robot is facing the marker thing that is closest to our teams' goal
+                            driveEncoders(1, 20);
+                            turnTo(side * -25);
+                            //2: launch donut 1 at the marker
                             //insert launching method here
-                            //3: then we want to drop the wobble goal
-                            //1: then drive forward to area B
-                            driveEncoders(1, 500);
-                            //2: and drop the wobble goal
-                            //insert plopper method here
-                            //4: then reverse onto the line thing and park
-                            //1: reverse onto the line thing
-                            //2: park lol idk
-                            driveEncoders(-1, 250);
+                            //3: rotate a lil more to face the middle marker
+                            turnTo(side * -35);
+                            //4: launch donut 2 at the marker
+                            //insert launching method here
+                            //5: rotate a lil more to face the farthest marker, or the marker most far from our teams' goal
+                            turnTo(side * -45);
+                            //6: launch donut 3 at the marker
+                            //insert launching method here
+                            //1: we want to rotate so we're flush facing our team's goal
+                            strafeEncoders(side * 1, 200);
+                            driveEncoders(1, 750);
+                            turnTo(-side * 90);
+                            // insert plopper method here
+                            strafeEncoders(-1, -250);
 
                         case "C":
-
-                            //2: i think the next step should be strafing a lil bit so the donut(s) that we scan at the start are lined up with the intake
-                            strafeEncoders(-0.5,  100);
-                            //3: then drive forward and intake 3 donuts
-                            driveEncoders(1, 250);
-                            //insert intake method here
-                            //insert intake method here
-                            //insert intake method here
-                            //4: launch da donuts into the top goal
+                            //starting position: turned facing the donuts
+                            turnTo(side * 0);
+                            //1: we want to first rotate towards the center of the field, and launch a donut at each of the goals in the middle
+                            //1: turn so the robot is facing the marker thing that is closest to our teams' goal
+                            driveEncoders(1, 20);
+                            turnTo(side * -25);
+                            //2: launch donut 1 at the marker
                             //insert launching method here
-                            //5: intake the last donut
-                            //insert intake method here
-                            //6: launch da donut into the top goal
+                            //3: rotate a lil more to face the middle marker
+                            turnTo(side * -35);
+                            //4: launch donut 2 at the marker
                             //insert launching method here
-                            //3: then we want to drop the wobble goal
-                            //1: drive forward until we're in front of our team's goal
-                            driveEncoders(1, 500);
-                            //2: then you rotate towards area C
-                            turnTo(side * 90);
-                            //3: then drive forward into the area
-                            driveEncoders(1, 200);
-                            //4: drop the wobble goal
-                            //insert plopper method here
-                            //4: then we have to return to the line thing and park
-                            //1: reverse so that we're in front of our goal
-                            driveEncoders(-1, 200);
-                            //2: strafe to the line and park
-                            strafeEncoders(1, side * 500);
+                            //5: rotate a lil more to face the farthest marker, or the marker most far from our teams' goal
+                            turnTo(side * -45);
+                            //6: launch donut 3 at the marker
+                            //insert launching method here
+                            //1: we want to rotate so we're flush facing our team's goal
+                            strafeEncoders(side * 1, 200);
+                            driveEncoders(1, 1000);
+                            // insert plopper method here
+                            driveEncoders(-1, -500);
                     }
-                }
-
-                    case ("MidOption3"):
-                        asd = robot.openCV.check();
-                        telemetry.addLine(asd);
-                        telemetry.update();
-                        ree = System.currentTimeMillis();
-                        while (System.currentTimeMillis() - ree < 2000) {
-                        }
+                case ("MidOption2"):
+                    asd = robot.openCV.check();
+                    telemetry.addLine(asd);
+                    telemetry.update();
+                    ree = System.currentTimeMillis();
+                    while (System.currentTimeMillis() - ree < 2000) {
                         switch (asd) {
                             case "A":
-                                //starting position: turned facing the donuts
-                                turnTo(side*0);
-                                //1: we want to first rotate towards the center of the field, and launch a donut at each of the goals in the middle
-                                //1: turn so the robot is facing the marker thing that is closest to our teams' goal
-                                driveEncoders(1, 20);
-                                turnTo(side*-35);
-                                //2: launch donut 1 at the marker
-                                //insert launching method here
-                                //3: rotate a lil more to face the middle marker
-                                turnTo(side*-45);
-                                //4: launch donut 2 at the marker
-                                //insert launching method here
-                                //5: rotate a lil more to face the farthest marker, or the marker most far from our teams' goal
-                                turnTo(side*-55);
-                                //6: launch donut 3 at the marker
-                                //insert launching method here
-                                //2: then we want to drop the wobble goal
-                                turnTo(side*0);
-                                strafeEncoders(side*1,200);
-                                //1: then drive forward so we are lined up with area A, while being in front of our goal
-                                driveEncoders(1, 500);
-                                //2: rotate towards area A
-                                turnTo(side*-90);
-                                //3: drive forward so the wobble goal is in the area
+                                strafeEncoders(side * 1, 200);
                                 driveEncoders(1, 200);
                                 //4: and drop the wobble goal
                                 //insert plopper function
@@ -588,102 +494,193 @@ public class Autonomouss extends BaseAutonomous {
                                 //1: reverse so we're lined up with the goal
                                 //2: strafe to the line and park
                                 driveEncoders(-1, 250);
-                                strafeEncoders(side*-1,250);
-
 
 
                             case "B":
-                                //starting position: turned facing the donuts
-                                turnTo(side*0);
-                                //1: we want to first rotate towards the center of the field, and launch a donut at each of the goals in the middle
-                                //1: turn so the robot is facing the marker thing that is closest to our teams' goal
-                                driveEncoders(1, 20);
-                                turnTo(side*-35);
-                                //2: launch donut 1 at the marker
+                                strafeEncoders(side * -1, 100);
+                                //3: then drive forward and intake 1 donut
+                                driveEncoders(1, 250);
+                                //insert intake method here
+                                //4: launch da donut into the top goal
                                 //insert launching method here
-                                //3: rotate a lil more to face the middle marker
-                                turnTo(side*-45);
-                                //4: launch donut 2 at the marker
-                                //insert launching method here
-                                //5: rotate a lil more to face the farthest marker, or the marker most far from our teams' goal
-                                turnTo(side*-55);
-                                //6: launch donut 3 at the marker
-                                //insert launching method here
-                                //2: then we want to pick up any donuts on the field and send them into the top goal
-                                //1: we want to rotate so we're flush facing our team's goal
-                                turnTo(side*0);
-                                strafeEncoders(side*1,200);
-                                //2: i think the next step should be strafing a lil bit so the donut(s) that we scan at the start are lined up with the intake
                                 //3: then we want to drop the wobble goal
                                 //1: then drive forward to area B
-                                driveEncoders(1, 750);
-                                strafeEncoders(side*1,250);
+                                driveEncoders(1, 500);
                                 //2: and drop the wobble goal
                                 //insert plopper method here
                                 //4: then reverse onto the line thing and park
                                 //1: reverse onto the line thing
                                 //2: park lol idk
-                                driveEncoders(-1,500);
+                                driveEncoders(-1, 250);
 
                             case "C":
-                                //starting position: turned facing the donuts
-                                turnTo(side*0);
-                                //1: we want to first rotate towards the center of the field, and launch a donut at each of the goals in the middle
-                                //1: turn so the robot is facing the marker thing that is closest to our teams' goal
-                                driveEncoders(1, 20);
-                                turnTo(side*-35);
-                                //2: launch donut 1 at the marker
+
+                                //2: i think the next step should be strafing a lil bit so the donut(s) that we scan at the start are lined up with the intake
+                                strafeEncoders(-0.5, 100);
+                                //3: then drive forward and intake 3 donuts
+                                driveEncoders(1, 250);
+                                //insert intake method here
+                                //insert intake method here
+                                //insert intake method here
+                                //4: launch da donuts into the top goal
                                 //insert launching method here
-                                //3: rotate a lil more to face the middle marker
-                                turnTo(side*-45);
-                                //4: launch donut 2 at the marker
+                                //5: intake the last donut
+                                //insert intake method here
+                                //6: launch da donut into the top goal
                                 //insert launching method here
-                                //5: rotate a lil more to face the farthest marker, or the marker most far from our teams' goal
-                                turnTo(side*-55);
-                                //6: launch donut 3 at the marker
-                                //insert launching method here
-                                //2: then we want to pick up any donuts on the field and send them into the top goal
-                                //1: we want to rotate so we're flush facing our team's goal
-                                turnTo(side*0);
-                                //driveEncoders(-0.1, 20);
                                 //3: then we want to drop the wobble goal
                                 //1: drive forward until we're in front of our team's goal
-                                driveEncoders(1,750);
+                                driveEncoders(1, 500);
+                                //2: then you rotate towards area C
+                                turnTo(side * 90);
+                                //3: then drive forward into the area
+                                driveEncoders(1, 200);
                                 //4: drop the wobble goal
                                 //insert plopper method here
                                 //4: then we have to return to the line thing and park
                                 //1: reverse so that we're in front of our goal
-                                driveEncoders(-1,200);
+                                driveEncoders(-1, 200);
+                                //2: strafe to the line and park
+                                strafeEncoders(1, side * 500);
                         }
+                    }
 
-                    case ("MinPoints"):
-                        while (System.currentTimeMillis() - ree < 2000) { }
-                        turnTo(side * 30);
-                        asd = robot.openCV.check();
-                        telemetry.addLine(asd);
-                        telemetry.update();
-                        ree = System.currentTimeMillis();
-                        turnTo(-side * 30);
-                        switch (asd) {
-                            case "A":
-                                strafeEncoders(side * 1, 200);
-                                driveEncoders(1, 500);
-                                // insert plopper method here
-                                driveEncoders(-1, 100);
+                case ("MidOption3"):
+                    asd = robot.openCV.check();
+                    telemetry.addLine(asd);
+                    telemetry.update();
+                    ree = System.currentTimeMillis();
+                    while (System.currentTimeMillis() - ree < 2000) {
+                    }
+                    switch (asd) {
+                        case "A":
+                            //starting position: turned facing the donuts
+                            turnTo(side * 0);
+                            //1: we want to first rotate towards the center of the field, and launch a donut at each of the goals in the middle
+                            //1: turn so the robot is facing the marker thing that is closest to our teams' goal
+                            driveEncoders(1, 20);
+                            turnTo(side * -35);
+                            //2: launch donut 1 at the marker
+                            //insert launching method here
+                            //3: rotate a lil more to face the middle marker
+                            turnTo(side * -45);
+                            //4: launch donut 2 at the marker
+                            //insert launching method here
+                            //5: rotate a lil more to face the farthest marker, or the marker most far from our teams' goal
+                            turnTo(side * -55);
+                            //6: launch donut 3 at the marker
+                            //insert launching method here
+                            //2: then we want to drop the wobble goal
+                            turnTo(side * 0);
+                            strafeEncoders(side * 1, 200);
+                            //1: then drive forward so we are lined up with area A, while being in front of our goal
+                            driveEncoders(1, 500);
+                            //2: rotate towards area A
+                            turnTo(side * -90);
+                            //3: drive forward so the wobble goal is in the area
+                            driveEncoders(1, 200);
+                            //4: and drop the wobble goal
+                            //insert plopper function
+                            //3: then we gotta get back to the line and park
+                            //1: reverse so we're lined up with the goal
+                            //2: strafe to the line and park
+                            driveEncoders(-1, 250);
+                            strafeEncoders(side * -1, 250);
 
-                            case "B":
-                                strafeEncoders(side * 1, 200);
-                                driveEncoders(1, 750);
-                                turnTo(-side * 90);
-                                // insert plopper method here
-                                strafeEncoders(-1, -250);
 
-                            case "C":
-                                strafeEncoders(side * 1, 200);
-                                driveEncoders(1, 1000);
-                                // insert plopper method here
-                                driveEncoders(-1, -500);
-                        }
+                        case "B":
+                            //starting position: turned facing the donuts
+                            turnTo(side * 0);
+                            //1: we want to first rotate towards the center of the field, and launch a donut at each of the goals in the middle
+                            //1: turn so the robot is facing the marker thing that is closest to our teams' goal
+                            driveEncoders(1, 20);
+                            turnTo(side * -35);
+                            //2: launch donut 1 at the marker
+                            //insert launching method here
+                            //3: rotate a lil more to face the middle marker
+                            turnTo(side * -45);
+                            //4: launch donut 2 at the marker
+                            //insert launching method here
+                            //5: rotate a lil more to face the farthest marker, or the marker most far from our teams' goal
+                            turnTo(side * -55);
+                            //6: launch donut 3 at the marker
+                            //insert launching method here
+                            //2: then we want to pick up any donuts on the field and send them into the top goal
+                            //1: we want to rotate so we're flush facing our team's goal
+                            turnTo(side * 0);
+                            strafeEncoders(side * 1, 200);
+                            //2: i think the next step should be strafing a lil bit so the donut(s) that we scan at the start are lined up with the intake
+                            //3: then we want to drop the wobble goal
+                            //1: then drive forward to area B
+                            driveEncoders(1, 750);
+                            strafeEncoders(side * 1, 250);
+                            //2: and drop the wobble goal
+                            //insert plopper method here
+                            //4: then reverse onto the line thing and park
+                            //1: reverse onto the line thing
+                            //2: park lol idk
+                            driveEncoders(-1, 500);
+
+                        case "C":
+                            //starting position: turned facing the donuts
+                            turnTo(side * 0);
+                            //1: we want to first rotate towards the center of the field, and launch a donut at each of the goals in the middle
+                            //1: turn so the robot is facing the marker thing that is closest to our teams' goal
+                            driveEncoders(1, 20);
+                            turnTo(side * -35);
+                            //2: launch donut 1 at the marker
+                            //insert launching method here
+                            //3: rotate a lil more to face the middle marker
+                            turnTo(side * -45);
+                            //4: launch donut 2 at the marker
+                            //insert launching method here
+                            //5: rotate a lil more to face the farthest marker, or the marker most far from our teams' goal
+                            turnTo(side * -55);
+                            //6: launch donut 3 at the marker
+                            //insert launching method here
+                            //2: then we want to pick up any donuts on the field and send them into the top goal
+                            //1: we want to rotate so we're flush facing our team's goal
+                            turnTo(side * 0);
+                            //driveEncoders(-0.1, 20);
+                            //3: then we want to drop the wobble goal
+                            //1: drive forward until we're in front of our team's goal
+                            driveEncoders(1, 750);
+                            //4: drop the wobble goal
+                            //insert plopper method here
+                            //4: then we have to return to the line thing and park
+                            //1: reverse so that we're in front of our goal
+                            driveEncoders(-1, 200);
+                    }
+
+                case ("MinPoints"):
+                    while (System.currentTimeMillis() - ree < 2000) {
+                    }
+                    turnTo(side * 30);
+                    asd = robot.openCV.check();
+                    telemetry.addLine(asd);
+                    telemetry.update();
+                    ree = System.currentTimeMillis();
+                    turnTo(-side * 30);
+                    switch (asd) {
+                        case "A":
+                            strafeEncoders(side * 1, 200);
+                            driveEncoders(1, 500);
+                            // insert plopper method here
+                            driveEncoders(-1, 100);
+
+                        case "B":
+                            strafeEncoders(side * 1, 200);
+                            driveEncoders(1, 750);
+                            turnTo(-side * 90);
+                            // insert plopper method here
+                            strafeEncoders(-1, -250);
+
+                        case "C":
+                            strafeEncoders(side * 1, 200);
+                            driveEncoders(1, 1000);
+                            // insert plopper method here
+                            driveEncoders(-1, -500);
+                    }
                 /*if(asd.equals("A")) //if there are 0 donuts
                     if (robot.selector.color.equals("Blue")) {
                         side = -1;
@@ -724,7 +721,10 @@ public class Autonomouss extends BaseAutonomous {
                         while (true){
 
                         }*/
-                }
+            }
+        }
+        catch(IOException e) {
+        }
         }
     }
 
